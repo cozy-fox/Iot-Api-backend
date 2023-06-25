@@ -34,6 +34,17 @@ exports.deleteUsers=async (req,res)=>{
     const result = await User.deleteMany({ _id: { $in: req.body.selectedUsers } });
     res.status(200).send({message:`${result.deletedCount} documents were deleted.`});
   } catch (err) {
-    console.error(err);
+    res.status(401).send({ message:err.message });
+  }
+}
+
+exports.updateUsers=async (req,res)=>{
+  try {
+    const value=req.body.field=="allowed"?req.body.value=="true":req.body.value;
+    const result = await User.updateMany({ _id: { $in: req.body.selectedUsers } },
+      {$set:{[req.body.field]:value}});
+    res.status(200).send({message:`${result.modifiedCount} documents "${req.body.field}" set as ${req.body.value}.`});
+  } catch (err) {
+    res.status(401).send({ message:err.message });
   }
 }
