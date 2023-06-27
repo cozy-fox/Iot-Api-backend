@@ -3,9 +3,10 @@ const mongoose = require("mongoose");
 const YggioAuthen = mongoose.model(
   "YggioAuthen",
   new mongoose.Schema({
-    username: String,
-    password: String,
-    selected: Boolean
+    name: {
+      type: String
+    },
+    members: [String]
   })
 );
 

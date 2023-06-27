@@ -7,7 +7,6 @@ const dbConfig = require("./app/config/db.config");
 const app = express();
 
 var corsOptions = {
-  origin: "http://localhost:8081"
 };
 
 app.use(cors(corsOptions));
@@ -30,7 +29,7 @@ app.use(
 const db = require("./app/models");
 
 db.mongoose
-  .connect(`mongodb://127.0.0.1:27017/${dbConfig.DB}`, {
+  .connect(`mongodb+srv://townsendphilip767:YNWQe9tJUHaGeJE2@cluster0.zdargno.mongodb.net/${dbConfig.DB}`, {
     useNewUrlParser: true
   })
   .then(() => {
