@@ -46,7 +46,7 @@ app.get("/", (req, res) => {
   res.json({ message: "Welcome to bezkoder application." });
 });
 
-setTimeout(deviceController.getDevice, 0);
+setTimeout(deviceController.getDeviceFromAggio, 0);
 
 // routes
 require("./app/routes/auth.routes")(app);

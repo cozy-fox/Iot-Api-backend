@@ -18,7 +18,6 @@ exports.signup = async (req, res) => {
     await user.save();
     res.send({ message: "User was registered successfully!" });
   } catch (err) {
-    console.log(err.message);
     res.status(500).send({ message: err.message });
   }
 };
@@ -31,6 +30,10 @@ exports.signin = async (req, res) => {
 
     if (!user) {
       return res.status(404).send({ message: "User Not found." });
+    }
+
+    if (user.allowed==false) {
+      return res.status(404).send({ message: "You are not allowed." });
     }
 
     const passwordIsValid = bcrypt.compareSync(req.body.password, user.password);

@@ -18,7 +18,11 @@ const User = mongoose.model(
     group: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'deveicegroup'
-    }]
+    }],
+    status: {
+      type: String,
+      required: true
+    }
   })
 );
 

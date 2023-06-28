@@ -4,34 +4,40 @@ const db = require("../models");
 const User = db.user;
 
 verifyToken = (req, res, next) => {
-  console.log('verify token',req.body,req.url, req.method);
+  console.log('verify token', req.body, req.url, req.method);
 
   let token = req.headers['token'];
   if (!token) {
     return res.status(403).send({ message: "No token provided!" });
   }
 
-  jwt.verify(token.slice(7), config.secret, (err, decoded) => {
+  jwt.verify(token.slice(7), config.secret, async (err, decoded) => {
     if (err) {
       return res.status(401).send({ message: "Unauthorized!" });
     }
-    req.userId = decoded.id;
-    next();
+    
+    const user = await User.findById(decoded.id).exec();
+    if (user.allowed === true) {
+      req.userId = decoded.id;
+      next();
+    } else {
+      res.status(403).send({ message: 'You are not allowed!' });
+    }
   });
 };
 
 isAdmin = async (req, res, next) => {
-  console.log('admin check',req.body);
+  console.log('admin check');
   try {
     const user = await User.findById(req.userId).exec();
     if (user.role === 'admin') {
-        next();
+      next();
     } else {
-        res.status(403).send({ message: 'Require Admin Role!' });
+      res.status(403).send({ message: 'Require Admin Role!' });
     }
-} catch (err) {
+  } catch (err) {
     res.status(500).send({ message: err });
-}
+  }
 };
 
 

@@ -11,7 +11,7 @@ module.exports = function(app) {
     next();
   });
 
-  app.get("/api/devices/admin", [authJwt.verifyToken, authJwt.isAdmin], deviceController.getDevice4Admin);
+  app.get("/api/devices", [authJwt.verifyToken], deviceController.getDevice);
 
   app.post("/api/device_group", [authJwt.verifyToken, authJwt.isAdmin], userGroupController.createDeviceGroup);
   app.get("/api/device_group", [authJwt.verifyToken, authJwt.isAdmin], userGroupController.getDeviceGroup);
