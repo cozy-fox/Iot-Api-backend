@@ -1,0 +1,86 @@
+const db = require("../models");
+const Device=db.device;
+const DeviceGroup=db.deviceGroup;
+const UserGroup=db.userGroup;
+
+exports.getDeviceGroup = async (req, res) => {
+    try {
+        const userGroups = await DeviceGroup.find().populate("members", "name").populate("reference2usergroup", "name");
+        res.status(201).send(userGroups);
+    } catch {
+        res.status(401).send({ message: err.message });
+    }
+}
+
+exports.createDeviceGroup = async (req, res) => {
+    try {
+        await DeviceGroup.create({ name: req.body.name });
+        res.status(201).send({ message: "UserGroup created successfully" });
+    } catch {
+        res.status(401).send({ message: err.message });
+    }
+}
+
+exports.deleteGroup = async (req, res) => {
+    try {
+        const result = await DeviceGroup.deleteMany({ _id: { $in: req.body.selectedGroups } });
+        res.status(200).send({ message: `${result.deletedCount} groups were deleted.` });
+    } catch (err) {
+        res.status(401).send({ message: err.message });
+    }
+}
+
+exports.renameGroup = async (req, res) => {
+    try {
+        const result = await DeviceGroup.updateMany(
+            { _id: { $in: req.body.selectedGroups } },
+            { $set: { name: req.body.newName } }
+        );
+        res.status(201).send({ message: `${result.modifiedCount} groups renamed as ${req.body.newName}` });
+    } catch (err) {
+        res.status(401).send({ message: err.message });
+    }
+}
+
+exports.updateGroup = async (req, res) => {
+    try {
+        const groupId = req.body.selected;
+        const memberId = req.body.newMember;
+
+        const group = await DeviceGroup.findById(groupId);
+        const member = await (req.body.field == 'members'?Device:UserGroup).findById(memberId);
+
+        if (!group || !member) {
+            res.status(401).send({ message: "Invalid group Id or member Id" });
+        }
+
+        if (req.body.field == 'members') {
+            if (req.body.value == 'add') {
+                group.members.includes(memberId)?'':group.members.push(memberId);
+            } else {
+                group.members.pull(memberId);
+            }
+        } else {
+            if (req.body.value == 'add') {
+                group.mreference2usergroupembers.includes(memberId)?'':group.reference2usergroup.push(memberId);
+            } else {
+                group.reference2usergroup.pull(memberId);
+            }
+        }
+
+        await group.save();
+        res.status(201).send({ message: `Added successfully` });
+    } catch (err) {
+        res.status(401).send({ message: err.message });
+    }
+}
+
+exports.get4select = async (req, res) => {
+    try {
+        const devices = await Device.find({},'name');
+        const users= await UserGroup.find({}, 'name');
+        res.status(201).send({devices:devices, users:users});
+    } catch {
+        res.status(401).send({ message: err.message });
+    }
+}

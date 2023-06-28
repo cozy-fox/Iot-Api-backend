@@ -1,12 +1,19 @@
 const mongoose = require("mongoose");
 
 const YggioAuthen = mongoose.model(
-  "YggioAuthen",
+  "deveicegroup",
   new mongoose.Schema({
     name: {
       type: String
     },
-    members: [String]
+    members: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Device'
+    }],
+    reference2usergroup:[{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'UserGroup'
+    }]
   })
 );
 
