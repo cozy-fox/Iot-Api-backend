@@ -50,7 +50,7 @@ exports.signin = async (req, res) => {
       username: user.username,
       email: user.email,
       roles: user.role,
-      token:token
+      token: token
     });
   } catch (err) {
     res.status(500).send({ message: err.message });
@@ -61,3 +61,27 @@ exports.signout = (req, res) => {
   req.session = null;
   res.status(200).send({ message: "You've been signed out!" });
 };
+
+exports.getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    res.status(200).send({ username: user.username, email: user.email });
+  } catch {
+    res.status(401).send({ message: err.message });
+  }
+}
+
+exports.modifyProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    user.username=req.body.username;
+    user.email=req.body.email;
+    if (user.password.length>8){
+      user.password=bcrypt.hashSync(req.body.password, 8)
+    }
+    await user.save();
+    res.status(200).send({message:"Changed Successfully" });
+  } catch {
+    res.status(401).send({ message: err.message });
+  }
+}

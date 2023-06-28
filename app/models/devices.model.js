@@ -14,7 +14,11 @@ const User = mongoose.model(
     data: {
       type: mongoose.Schema.Types.Mixed,
       required: true
-    }
+    },
+    group: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'deveicegroup'
+    }]
   })
 );
 

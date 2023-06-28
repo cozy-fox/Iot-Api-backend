@@ -25,6 +25,19 @@ exports.createUserGroup = async (req, res) => {
 
 exports.deleteUserGroup = async (req, res) => {
     try {
+        const data=await UserGroup.find({ _id: { $in: req.body.selectedGroups } });
+        for(eachDevice of data){
+            for(each of eachDevice.members){
+                const device=await User.findById(each);
+                device.group.pull(eachDevice_id);
+                await device.save();
+            }
+            for(each of eachDevice.reference2devicegroup){
+                const device=await DeviceGroup.findById(each);
+                device.group.pull(eachDevice_id);
+                await device.save();
+            }
+        }
         const result = await UserGroup.deleteMany({ _id: { $in: req.body.selectedGroups } });
         res.status(200).send({ message: `${result.deletedCount} groups were deleted.` });
     } catch (err) {
@@ -58,18 +71,26 @@ exports.updateUserGroup = async (req, res) => {
 
         if (req.body.field == 'members') {
             if (req.body.value == 'add') {
-                group.members.includes(memberId)?'':group.members.push(memberId);
+                if(!group.members.includes(memberId)){
+                    member.group.push(groupId);
+                    group.members.push(memberId);
+                }
             } else {
+                member.group.pull(groupId);
                 group.members.pull(memberId);
             }
         } else {
             if (req.body.value == 'add') {
-                group.reference2devicegroup.includes(memberId)?'':group.reference2devicegroup.push(memberId);
+                if(!group.reference2devicegroup.includes(memberId)){
+                    member.reference2usergroup.push(groupId);
+                    group.reference2devicegroup.push(memberId);
+                }
             } else {
+                member.reference2usergroup.pull(groupId);
                 group.reference2devicegroup.pull(memberId);
             }
         }
-
+        await member.save();
         await group.save();
         res.status(201).send({ message: `Added successfully` });
     } catch (err) {

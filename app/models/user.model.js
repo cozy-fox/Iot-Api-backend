@@ -24,10 +24,10 @@ const User = mongoose.model(
       type: String,
       required: true
     },
-    group: {
+    group: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'UserGroup'
-    }
+    }]
   })
 );
 
