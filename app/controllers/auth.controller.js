@@ -32,7 +32,7 @@ exports.signin = async (req, res) => {
       return res.status(404).send({ message: "User Not found." });
     }
 
-    if (user.allowed==false) {
+    if (user.allowed == false) {
       return res.status(404).send({ message: "You are not allowed." });
     }
 
@@ -67,9 +67,24 @@ exports.signout = (req, res) => {
 
 exports.getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.userId);
-    res.status(200).send({ username: user.username, email: user.email });
-  } catch {
+    const user = await User.findById(req.userId).populate('group', 'reference2devicegroup name');
+    var userGroup = [];
+    var deviceGroup = [];
+    console.log(user);
+    if (user && user.group && Array.isArray(user.group)) {
+      for (eachUserGroup of user.group) {
+        eachUserGroup.name && userGroup.push(eachUserGroup.name);
+        if(eachUserGroup.reference2devicegroup&&Array.isArray(eachUserGroup.reference2devicegroup)){
+          for (eachDeviceGroupId of eachUserGroup.reference2devicegroup) {
+            const eachDeviceGroup = await db.deviceGroup.findById(eachDeviceGroupId);
+            console.log(eachDeviceGroup);
+            deviceGroup.push(eachDeviceGroup.name);
+          }
+        }
+      }
+    }
+    res.status(200).send({ username: user.username, email: user.email, userGroup: userGroup, deviceGroup: deviceGroup });
+  } catch (err) {
     res.status(401).send({ message: err.message });
   }
 }
@@ -77,13 +92,13 @@ exports.getProfile = async (req, res) => {
 exports.modifyProfile = async (req, res) => {
   try {
     const user = await User.findById(req.userId);
-    user.username=req.body.username;
-    user.email=req.body.email;
-    if (user.password.length>8){
-      user.password=bcrypt.hashSync(req.body.password, 8)
+    user.username = req.body.username;
+    user.email = req.body.email;
+    if (user.password.length > 8) {
+      user.password = bcrypt.hashSync(req.body.password, 8)
     }
     await user.save();
-    res.status(200).send({message:"Changed Successfully" });
+    res.status(200).send({ message: "Changed Successfully" });
   } catch {
     res.status(401).send({ message: err.message });
   }

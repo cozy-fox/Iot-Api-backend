@@ -1,5 +1,4 @@
 module.exports = {
-  HOST: "ac-bouicw6-shard-00-00.zdargno.mongodb.net",
-  PORT: 27017,
+  HOST: "mongodb://127.0.0.1:27017",
   DB: "iot_manage"
 };

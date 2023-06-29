@@ -1,4 +1,13 @@
-const axios = require('axios');
+const nodemailer = require('nodemailer');
+const emailConfig=require('../config/email.config');
+
+const transporter = nodemailer.createTransport({
+    service: emailConfig.server,
+    auth: {
+      user: emailConfig.username,
+      pass: emailConfig.password
+    }
+  });
 
 const db = require("../models");
 const User = db.user;
@@ -74,10 +83,40 @@ exports.updateUserGroup = async (req, res) => {
                 if(!group.members.includes(memberId)){
                     member.group.push(groupId);
                     group.members.push(memberId);
+                    transporter.sendMail({
+                        from: emailConfig.username,
+                        to: member.email,
+                        subject: 'You have been successfully added to User Group '+group.name,
+                        text: `Hi, ${member.username}.\n\n
+                        You have been successfully added to User Group ${group.name}.\n 
+                        Consequently, you now possess the ability to monitor the devices included in this group.\n\n
+                        Thank you`
+                      }, function(error, info) {
+                        if (error) {
+                          console.log('Error:', error);
+                        } else {
+                          console.log('Email sent:');
+                        }
+                      });
                 }
             } else {
                 member.group.pull(groupId);
                 group.members.pull(memberId);
+                transporter.sendMail({
+                    from: emailConfig.username,
+                    to: member.email,
+                    subject: 'You have been revoked from User Group '+group.name,
+                    text: `Hi, ${member.username}.\n\n
+                    You have been revoked from User Group ${group.name}.\n 
+                    Unfortunately, you no longer possess the capability to monitor the devices associated with this group. I apologize for any inconvenience caused.\n\n
+                    Sorry`
+                  }, function(error, info) {
+                    if (error) {
+                      console.log('Error:', error);
+                    } else {
+                      console.log('Email sent:');
+                    }
+                  });
             }
         } else {
             if (req.body.value == 'add') {
