@@ -15,10 +15,10 @@ const User = mongoose.model(
       type: mongoose.Schema.Types.Mixed,
       required: true
     },
-    group: [{
+    group: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'deveicegroup'
-    }],
+      ref: 'devicegroup'
+    },
     status: {
       type: String,
       required: true

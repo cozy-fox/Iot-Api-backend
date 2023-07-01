@@ -26,7 +26,7 @@ const User = mongoose.model(
     },
     group: [{
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'UserGroup'
+      ref: 'devicegroup'
     }]
   })
 );

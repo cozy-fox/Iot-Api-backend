@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const cookieSession = require("cookie-session");
+const path=require("path");
 const deviceController = require("./app/controllers/device.controller");
 
 const dbConfig = require("./app/config/db.config");
@@ -41,9 +42,11 @@ db.mongoose
     process.exit();
   });
 
-// simple route
+app.use(express.static(path.join(__dirname, 'build')))
+
+
 app.get("/", (req, res) => {
-  res.json({ message: "Welcome to bezkoder application." });
+  res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
 setTimeout(deviceController.getDeviceFromAggio, 0);

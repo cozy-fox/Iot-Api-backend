@@ -18,31 +18,38 @@ async function getYggioToken() {
 }
 
 async function getDeviceFromAggio(req, res) {
-    axios.get(yggioConfig.server + '/iotnodes', { headers: { Authorization: 'Bearer ' + token } })
+    await axios.get(yggioConfig.server + '/iotnodes', { headers: { Authorization: 'Bearer ' + token } })
         .then(async (response) => {
             var devicesids = await Device.find({}, 'yggioId');
+            // console.log(devicesids);
             devicesids = devicesids.map(each => each.yggioId);
+            // console.log(devicesids);
             for (each of response.data) {
-                await Device.updateOne({ yggioId: each._id }, { status: 'available' });
+                // console.log('each',each._id);
+                await Device.updateOne({ yggioId: each._id }, { $set: { status: 'available' } });
                 devicesids = await devicesids.filter(item => item !== each._id);
                 const device = await Device.findOne({ yggioId: each._id });
                 if (device == null) {
+                    // console.log('null')
                     await Device.create({ name: each.name, yggioId: each._id, data: each, status: 'available' });
                 } else if (device.data != each) {
-                    await Device.updateOne({ yggioId: each._id }, { name: each.name, data: each });
+                    // console.log('update')
+                    await Device.updateOne({ yggioId: each._id }, { $set: { name: each.name, data: each } });
                 }
             }
+            // console.log('finish',devicesids);
             for (each of devicesids) {
-                await Device.updateOne({ yggioId: each }, { status: 'offline' })
+                await Device.updateOne({ yggioId: each }, { $set: { status: 'offline' } })
             }
-        }).catch(error => {
+        })
+        .catch(async error => {
             if (error.response && error.response.data == ("Invalid authorization token" || "Token expired")) {
-                getYggioToken();
+                await getYggioToken();
             } else {
-                console.log(error);
+                console.log("Yggio connection Error");
             }
         });
-    setTimeout(getDeviceFromAggio, 1000);
+    setTimeout(getDeviceFromAggio, 1000 * yggioConfig.sendRequestPeriod);
 }
 
 exports.getDeviceFromAggio = getDeviceFromAggio;
@@ -52,23 +59,20 @@ exports.getDevice = async (req, res) => {
         const user = await db.user.findById(req.userId);
         var result = [];
         if (user.role == 'admin') {
-            result = await Device.find();
+            result = await Device.find().populate('group', 'name');
         } else {
-            for (const usergroupid of user.group) {
-                const usergroup = await db.userGroup.findById(usergroupid);
-                for (const devicegroupid of usergroup.reference2devicegroup) {
-                    const devicegroup = await db.deviceGroup.findById(devicegroupid);
-                    for (const deviceid of devicegroup.members) {
-                        const device = await db.device.findById(deviceid);
-                        var flag = false;
-                        for (const each of result) {
-                            if (each._id == device._id) { flag = true; break; }
-                        }
-                        if (flag) {
-                            continue;
-                        } else {
-                            result.push(device);
-                        }
+            for (const devicegroupid of user.group) {
+                const devicegroup = await db.deviceGroup.findById(devicegroupid);
+                for (const deviceid of devicegroup.members) {
+                    const device = await db.device.findById(deviceid).populate('group', 'name');
+                    var flag = false;
+                    for (const each of result) {
+                        if (each._id == device._id) { flag = true; break; }
+                    }
+                    if (flag) {
+                        continue;
+                    } else {
+                        result.push(device);
                     }
                 }
             }

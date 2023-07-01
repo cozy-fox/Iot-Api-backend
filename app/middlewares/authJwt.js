@@ -4,8 +4,6 @@ const db = require("../models");
 const User = db.user;
 
 verifyToken = (req, res, next) => {
-  console.log('verify token', req.body, req.url, req.method);
-
   let token = req.headers['token'];
   if (!token) {
     return res.status(403).send({ message: "No token provided!" });
@@ -27,7 +25,6 @@ verifyToken = (req, res, next) => {
 };
 
 isAdmin = async (req, res, next) => {
-  console.log('admin check');
   try {
     const user = await User.findById(req.userId).exec();
     if (user.role === 'admin') {

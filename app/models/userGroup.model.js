@@ -13,7 +13,7 @@ const User = mongoose.model(
         }],
         reference2devicegroup:[{
           type: mongoose.Schema.Types.ObjectId,
-          ref: 'deveicegroup'
+          ref: 'devicegroup'
         }]
 
     })

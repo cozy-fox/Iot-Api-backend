@@ -67,23 +67,8 @@ exports.signout = (req, res) => {
 
 exports.getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.userId).populate('group', 'reference2devicegroup name');
-    var userGroup = [];
-    var deviceGroup = [];
-    console.log(user);
-    if (user && user.group && Array.isArray(user.group)) {
-      for (eachUserGroup of user.group) {
-        eachUserGroup.name && userGroup.push(eachUserGroup.name);
-        if(eachUserGroup.reference2devicegroup&&Array.isArray(eachUserGroup.reference2devicegroup)){
-          for (eachDeviceGroupId of eachUserGroup.reference2devicegroup) {
-            const eachDeviceGroup = await db.deviceGroup.findById(eachDeviceGroupId);
-            console.log(eachDeviceGroup);
-            deviceGroup.push(eachDeviceGroup.name);
-          }
-        }
-      }
-    }
-    res.status(200).send({ username: user.username, email: user.email, userGroup: userGroup, deviceGroup: deviceGroup });
+    const user = await User.findById(req.userId).populate('group', 'name');
+    res.status(200).send({ username: user.username, email: user.email, userGroup: user.group });
   } catch (err) {
     res.status(401).send({ message: err.message });
   }

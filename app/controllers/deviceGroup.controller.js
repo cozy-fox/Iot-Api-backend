@@ -1,13 +1,13 @@
 const db = require("../models");
 const Device=db.device;
 const DeviceGroup=db.deviceGroup;
-const UserGroup=db.userGroup;
+const User=db.user;
 
 exports.getDeviceGroup = async (req, res) => {
     try {
-        const userGroups = await DeviceGroup.find().populate("members", "name").populate("reference2usergroup", "name");
+        const userGroups = await DeviceGroup.find().populate("members", "name").populate("reference2user", "username");
         res.status(201).send(userGroups);
-    } catch {
+    } catch (err){
         res.status(401).send({ message: err.message });
     }
 }
@@ -15,8 +15,8 @@ exports.getDeviceGroup = async (req, res) => {
 exports.createDeviceGroup = async (req, res) => {
     try {
         await DeviceGroup.create({ name: req.body.name });
-        res.status(201).send({ message: "UserGroup created successfully" });
-    } catch {
+        res.status(201).send({ message:`Group ${req.body.name} created successfully` });
+    } catch(err) {
         res.status(401).send({ message: err.message });
     }
 }
@@ -27,13 +27,16 @@ exports.deleteGroup = async (req, res) => {
         for(eachDevice of data){
             for(each of eachDevice.members){
                 const device=await Device.findById(each);
-                device.group.pull(eachDevice_id);
+                device.group=null;
                 await device.save();
             }
-            for(each of eachDevice.reference2usergroup){
-                const device=await UserGroup.findById(each);
-                device.group.pull(eachDevice_id);
-                await device.save();
+            for(each of eachDevice.reference2user){
+                console.log(each);
+                const user=await User.findById(each);
+                console.log(user);
+                user.group.pull(eachDevice._id);
+                console.log(user);
+                await user.save();
             }
         }
         const result = await DeviceGroup.deleteMany({ _id: { $in: req.body.selectedGroups } });
@@ -61,8 +64,9 @@ exports.updateGroup = async (req, res) => {
         const memberId = req.body.newMember;
 
         const group = await DeviceGroup.findById(groupId);
-        const member = await (req.body.field == 'members'?Device:UserGroup).findById(memberId);
+        const member = await (req.body.field == 'members'?Device:User).findById(memberId);
 
+        console.log(member, memberId, groupId);
         if (!group || !member) {
             res.status(401).send({ message: "Invalid group Id or member Id" });
         }
@@ -70,22 +74,22 @@ exports.updateGroup = async (req, res) => {
         if (req.body.field == 'members') {
             if (req.body.value == 'add') {
                 if(!group.members.includes(memberId)){
-                    member.group.push(groupId);
+                    member.group=groupId;
                     group.members.push(memberId);
                 }
             } else {
-                member.group.pull(groupId);
+                member.group=null;
                 group.members.pull(memberId);
             }
         } else {
             if (req.body.value == 'add') {
-                if(!group.reference2usergroup.includes(memberId)){
-                    member.reference2devicegroup.push(groupId);
-                    group.reference2usergroup.push(memberId);
+                if(!group.reference2user.includes(memberId)){
+                    member.group.push(groupId);
+                    group.reference2user.push(memberId);
                 }
             } else {
-                member.reference2devicegroup.pull(groupId);
-                group.reference2usergroup.pull(memberId);
+                member.group.pull(groupId);
+                group.reference2user.pull(memberId);
             }
         }
         await member.save();
@@ -98,10 +102,10 @@ exports.updateGroup = async (req, res) => {
 
 exports.get4select = async (req, res) => {
     try {
-        const devices = await Device.find({},'name');
-        const users= await UserGroup.find({}, 'name');
+        const devices = await Device.find({},'name group');
+        const users= await User.find({}, 'username');
         res.status(201).send({devices:devices, users:users});
-    } catch {
+    } catch (err){
         res.status(401).send({ message: err.message });
     }
 }

@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const YggioAuthen = mongoose.model(
-  "deveicegroup",
+  "devicegroup",
   new mongoose.Schema({
     name: {
       type: String
@@ -10,9 +10,9 @@ const YggioAuthen = mongoose.model(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Device'
     }],
-    reference2usergroup:[{
+    reference2user:[{
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'UserGroup'
+      ref: 'User'
     }]
   })
 );
