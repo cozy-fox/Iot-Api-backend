@@ -29,8 +29,8 @@ app.use(
 
 
 const db = require("./app/models");
-
-db.mongoose
+try{
+  db.mongoose
   .connect(`${dbConfig.HOST}/${dbConfig.DB}`, {
     useNewUrlParser: true
   })
@@ -41,6 +41,10 @@ db.mongoose
     console.error("Connection error", err);
     process.exit();
   });
+}catch(err){
+  console.log(err);
+}
+
 
 app.use(express.static(path.join(__dirname, 'build')))
 

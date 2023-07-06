@@ -1,5 +1,5 @@
 module.exports = {
     server: 'Gmail',
-    username: 'kentarosuzuki769@gmail.com',
-    password: '0p;/)P:?*'
+    username: 'monitor@netlink-testlabs.com',
+    password: 'Venus2009!'
 };

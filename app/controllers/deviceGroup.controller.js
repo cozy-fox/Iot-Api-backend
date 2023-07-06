@@ -1,7 +1,18 @@
 const db = require("../models");
+const nodemailer = require('nodemailer');
+const emailConfig = require('../config/email.config');
+
 const Device=db.device;
 const DeviceGroup=db.deviceGroup;
 const User=db.user;
+
+const transporter = nodemailer.createTransport({
+    service: emailConfig.server,
+    auth: {
+        user: emailConfig.username,
+        pass: emailConfig.password
+    }
+});
 
 exports.getDeviceGroup = async (req, res) => {
     try {
@@ -27,15 +38,11 @@ exports.deleteGroup = async (req, res) => {
         for(eachDevice of data){
             for(each of eachDevice.members){
                 const device=await Device.findById(each);
-                device.group=null;
                 await device.save();
             }
             for(each of eachDevice.reference2user){
-                console.log(each);
                 const user=await User.findById(each);
-                console.log(user);
                 user.group.pull(eachDevice._id);
-                console.log(user);
                 await user.save();
             }
         }
@@ -66,7 +73,6 @@ exports.updateGroup = async (req, res) => {
         const group = await DeviceGroup.findById(groupId);
         const member = await (req.body.field == 'members'?Device:User).findById(memberId);
 
-        console.log(member, memberId, groupId);
         if (!group || !member) {
             res.status(401).send({ message: "Invalid group Id or member Id" });
         }
@@ -86,10 +92,40 @@ exports.updateGroup = async (req, res) => {
                 if(!group.reference2user.includes(memberId)){
                     member.group.push(groupId);
                     group.reference2user.push(memberId);
+                    transporter.sendMail({
+                        from: emailConfig.username,
+                        to: group.email,
+                        subject: 'Admin have successfully added a Device Group '+group.name,
+                        text: `Hi, ${member.username}.\n\n
+                            Admin have successfully added User Group ${group.name}.\n 
+                            Consequently, you now possess the ability to monitor the devices included in this group.\n\n
+                            Thank you`
+                    }, function (error, info) {
+                        if (error) {
+                            console.log('Error:', error);
+                        } else {
+                            console.log('Email sent:');
+                        }
+                    });
                 }
             } else {
                 member.group.pull(groupId);
                 group.reference2user.pull(memberId);
+                transporter.sendMail({
+                    from: emailConfig.username,
+                    to: group.email,
+                    subject: 'Admin have successfully removed a Device Group '+group.name,
+                    text: `Hi, ${member.username}.\n\n
+                        Admin have successfully removed User Group ${group.name}.\n 
+                        Unfortunately, you no longer possess the capability to monitor the devices associated with this group. I apologize for any inconvenience caused.\n\n
+                        Thank you`
+                }, function (error, info) {
+                    if (error) {
+                        console.log('Error:', error);
+                    } else {
+                        console.log('Email sent:');
+                    }
+                });
             }
         }
         await member.save();
