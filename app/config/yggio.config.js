@@ -4,4 +4,3 @@ module.exports = {
     password: 'skl83r#opsf8yw3',
     sendRequestPeriod: 1
 };
-  

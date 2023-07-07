@@ -24,4 +24,6 @@ module.exports = function(app) {
 
   app.get("/api/profile", [authJwt.verifyToken], controller.getProfile);
   app.put("/api/profile", [authJwt.verifyToken], controller.modifyProfile);
+  app.put("/api/forgotPassword", controller.forgotPassword);
+  app.put("/api/resetPassword", controller.resetPassword);
 };

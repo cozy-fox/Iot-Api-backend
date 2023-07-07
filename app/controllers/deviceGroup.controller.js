@@ -7,7 +7,7 @@ const DeviceGroup=db.deviceGroup;
 const User=db.user;
 
 const transporter = nodemailer.createTransport({
-    service: emailConfig.server,
+    service: emailConfig.service,
     auth: {
         user: emailConfig.username,
         pass: emailConfig.password
@@ -26,7 +26,7 @@ exports.getDeviceGroup = async (req, res) => {
 exports.createDeviceGroup = async (req, res) => {
     try {
         await DeviceGroup.create({ name: req.body.name });
-        res.status(201).send({ message:`Group ${req.body.name} created successfully` });
+        res.status(201).send({ message:`Group ${req.body.name} created Sucessfully` });
     } catch(err) {
         res.status(401).send({ message: err.message });
     }
@@ -94,10 +94,10 @@ exports.updateGroup = async (req, res) => {
                     group.reference2user.push(memberId);
                     transporter.sendMail({
                         from: emailConfig.username,
-                        to: group.email,
-                        subject: 'Admin have successfully added a Device Group '+group.name,
+                        to: member.email,
+                        subject: 'Admin have Sucessfully added a Device Group '+group.name,
                         text: `Hi, ${member.username}.\n\n
-                            Admin have successfully added User Group ${group.name}.\n 
+                            Admin have Sucessfully added User Group ${group.name}.\n 
                             Consequently, you now possess the ability to monitor the devices included in this group.\n\n
                             Thank you`
                     }, function (error, info) {
@@ -113,10 +113,10 @@ exports.updateGroup = async (req, res) => {
                 group.reference2user.pull(memberId);
                 transporter.sendMail({
                     from: emailConfig.username,
-                    to: group.email,
-                    subject: 'Admin have successfully removed a Device Group '+group.name,
+                    to: member.email,
+                    subject: 'Admin have Sucessfully removed a Device Group '+group.name,
                     text: `Hi, ${member.username}.\n\n
-                        Admin have successfully removed User Group ${group.name}.\n 
+                        Admin have Sucessfully removed User Group ${group.name}.\n 
                         Unfortunately, you no longer possess the capability to monitor the devices associated with this group. I apologize for any inconvenience caused.\n\n
                         Thank you`
                 }, function (error, info) {
@@ -130,7 +130,7 @@ exports.updateGroup = async (req, res) => {
         }
         await member.save();
         await group.save();
-        res.status(201).send({ message: `Added successfully` });
+        res.status(201).send({ message: `Added Sucessfully` });
     } catch (err) {
         res.status(401).send({ message: err.message });
     }

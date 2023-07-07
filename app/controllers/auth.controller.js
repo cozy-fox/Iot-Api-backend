@@ -1,6 +1,8 @@
 const config = require("../config/auth.config");
 const db = require("../models");
+const crypto = require("crypto");
 const User = db.user;
+const Token = db.token;
 
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
@@ -16,7 +18,7 @@ exports.signup = async (req, res) => {
 
   try {
     await user.save();
-    res.send({ message: "User was registered successfully!" });
+    res.send({ message: "User was registered Sucessfully!" });
   } catch (err) {
     res.status(500).send({ message: err.message });
   }
@@ -83,8 +85,48 @@ exports.modifyProfile = async (req, res) => {
       user.password = bcrypt.hashSync(req.body.password, 8)
     }
     await user.save();
-    res.status(200).send({ message: "Changed Successfully" });
-  } catch {
+    res.status(200).send({ message: "Changed Sucessfully" });
+  } catch (err) {
+    res.status(401).send({ message: err.message });
+  }
+}
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      res.status(401).send({ message: "This email is not registered email." });
+    } else {
+      
+      let token = await Token.findOne({ userId: user._id });
+      if (!token) {
+        token = await Token.create({ userId: user._id, token: crypto.randomBytes(32).toString("hex") });
+      }
+      console.log(user._id + '/' + token.token);
+      res.status(200).send({ message: "Sent Sucessfully." });
+    }
+
+  } catch (err) {
+    res.status(401).send({ message: err.message });
+  }
+}
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const user = await User.findById(req.body.userId);
+    if (!user) {
+      res.status(401).send({ message: "Invalid Link or Expired" });
+    }
+    const token = await Token.findOne({
+      userId: user._id,
+      token: req.body.token,
+    });
+    if (!token) return res.status(401).send({ message: "Invalid Link or Expired" });
+    user.password = bcrypt.hashSync(req.body.password, 8);
+    await user.save();
+    await Token.deleteOne({userId: user._id});
+    res.status(200).send({ message: "Reset Password Sucessfully" });
+  } catch (err) {
     res.status(401).send({ message: err.message });
   }
 }

@@ -29,21 +29,18 @@ app.use(
 
 
 const db = require("./app/models");
-try{
+
   db.mongoose
   .connect(`${dbConfig.HOST}/${dbConfig.DB}`, {
     useNewUrlParser: true
   })
   .then(() => {
-    console.log("Successfully connect to MongoDB.");
+    console.log("Sucessfully connect to MongoDB.");
   })
   .catch(err => {
     console.error("Connection error", err);
     process.exit();
   });
-}catch(err){
-  console.log(err);
-}
 
 
 app.use(express.static(path.join(__dirname, 'build')))
@@ -59,6 +56,7 @@ setTimeout(deviceController.getDeviceFromAggio, 0);
 require("./app/routes/auth.routes")(app);
 require("./app/routes/user.routes")(app);
 require("./app/routes/device.routes")(app);
+require("./app/routes/admin.routes")(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
