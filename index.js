@@ -45,11 +45,6 @@ const db = require("./app/models");
 
 app.use(express.static(path.join(__dirname, 'build')))
 
-
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "build", "index.html"));
-});
-
 setTimeout(deviceController.getDeviceFromAggio, 0);
 
 // routes
@@ -57,6 +52,10 @@ require("./app/routes/auth.routes")(app);
 require("./app/routes/user.routes")(app);
 require("./app/routes/device.routes")(app);
 require("./app/routes/admin.routes")(app);
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
+});
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;

@@ -1,3 +1,3 @@
 module.exports = {
-  host: "http://198.105.126.99/"
+  host: "http://172.31.31.154:8080/"
 };

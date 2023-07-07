@@ -3,3 +3,4 @@ module.exports = {
   DB: "iot_manage"
 };
 // HOST: "mongodb+srv://kentarosuzuki769:DcT79tjRHD7qh7X@yggionetlink.nyirgyl.mongodb.net",  
+// mongodb://localhost:27017

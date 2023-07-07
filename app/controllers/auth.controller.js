@@ -101,34 +101,23 @@ exports.forgotPassword = async (req, res) => {
     } else {
       let newToken = crypto.randomBytes(32).toString("hex");
       emailSender.sendMail({
-        from: emailConfig.username,
-        to: member.email,
+        to: user.email,
         subject: 'Reset Password Request',
-        html: `<h3>${user.username}</h3>
-        <h4>Thank you for using our Yggio Sensor Website. <br> We received your request to reset your password.</h4>
-        <a href="${basicConfig.host}forgot_password/${user._id}/${newToken}"><button class="my-button">Click here to continue</button></a>
+        html: `<h3>Dear ${user.username}</h3>
+        <h5>Thank you for using our Yggio Sensor Website. <br> We received your request to reset your password.</h5>
+        <a href="${basicConfig.host}reset_password/${user._id}/${newToken}"><button 
+        style="background-color: #4CAF50;border: none;color: white;
+        border: none;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);" class="my-button">Click here to continue</button></a>
         <br>
-        <h4>Best Regards <br>NetlinkSDN</h4>
-        <style>
-            .my-button {
-              background-color: #4CAF50; /* Green */
-              border: none;
-              color: white;
-              padding: 15px 32px;
-              text-align: center;
-              text-decoration: none;
-              display: inline-block;
-              font-size: 16px;
-              margin: 4px 2px;
-              cursor: pointer;
-              border-radius: 8px;
-              box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-            }
-            
-            .my-button:hover {
-              background-color: #3e8e41;
-            }
-            </style>`
+        <h5>Best Regards <br>NetlinkSDN</h5>`
       });
       let token = await Token.findOne({ userId: user._id });
       if (token) { await Token.deleteMany({ userId: user._id }) }

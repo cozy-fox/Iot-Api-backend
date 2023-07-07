@@ -23,7 +23,7 @@ exports.sendMail = async (mail) => {
             }
         }
         const transporter = await nodemailer.createTransport(config);
-        await transporter.sendMail(mail,function (error, info) {
+        await transporter.sendMail({...mail,from:config.auth.user},function (error, info) {
             if (error) {
                 console.log('Error:', error);
             } else {

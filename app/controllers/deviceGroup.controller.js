@@ -86,7 +86,6 @@ exports.updateGroup = async (req, res) => {
                     member.group.push(groupId);
                     group.reference2user.push(memberId);
                     emailSender.sendMail({
-                        from: emailConfig.username,
                         to: member.email,
                         subject: 'Admin have Sucessfully added a Device Group '+group.name,
                         text: `Hi, ${member.username}.\n\n
@@ -99,7 +98,6 @@ exports.updateGroup = async (req, res) => {
                 member.group.pull(groupId);
                 group.reference2user.pull(memberId);
                 emailSender.sendMail({
-                    from: emailConfig.username,
                     to: member.email,
                     subject: 'Admin have Sucessfully removed a Device Group '+group.name,
                     text: `Hi, ${member.username}.\n\n
