@@ -6,9 +6,15 @@ const yggioConfig = require('../config/yggio.config');
 const Device = db.device;
 
 async function getYggioToken() {
-    await axios.post(yggioConfig.server + "/auth/local", {
-        'username': yggioConfig.username,
-        "password": yggioConfig.password
+    let username=yggioConfig.username;
+    let password=yggioConfig.password;
+    let server=yggioConfig.server;
+    const yggio=await db.yggio.findOne({selected:true});
+    if(yggio) {username=yggio.name; password=yggio.password; server=yggio.server;}
+
+    await axios.post(server + "/auth/local", {
+        'username': username,
+        "password": password
     })
         .then(response => {
             if (response.data.token) {
@@ -18,7 +24,11 @@ async function getYggioToken() {
 }
 
 async function getDeviceFromAggio(req, res) {
-    await axios.get(yggioConfig.server + '/iotnodes', { headers: { Authorization: 'Bearer ' + token } })
+    let server=yggioConfig.server;
+    const yggio=await db.yggio.findOne({selected:true});
+    if(yggio) server=yggio.url;
+    
+    await axios.get(server + '/iotnodes', { headers: { Authorization: 'Bearer ' + token } })
         .then(async (response) => {
             var devicesids = await Device.find({}, 'yggioId');
             // console.log(devicesids);

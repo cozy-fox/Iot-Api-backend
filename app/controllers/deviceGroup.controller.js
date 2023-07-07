@@ -1,18 +1,11 @@
 const db = require("../models");
-const nodemailer = require('nodemailer');
-const emailConfig = require('../config/email.config');
+const emailSender=require("../utils/sendMail");
 
 const Device=db.device;
 const DeviceGroup=db.deviceGroup;
 const User=db.user;
 
-const transporter = nodemailer.createTransport({
-    service: emailConfig.service,
-    auth: {
-        user: emailConfig.username,
-        pass: emailConfig.password
-    }
-});
+
 
 exports.getDeviceGroup = async (req, res) => {
     try {
@@ -92,7 +85,7 @@ exports.updateGroup = async (req, res) => {
                 if(!group.reference2user.includes(memberId)){
                     member.group.push(groupId);
                     group.reference2user.push(memberId);
-                    transporter.sendMail({
+                    emailSender.sendMail({
                         from: emailConfig.username,
                         to: member.email,
                         subject: 'Admin have Sucessfully added a Device Group '+group.name,
@@ -100,18 +93,12 @@ exports.updateGroup = async (req, res) => {
                             Admin have Sucessfully added User Group ${group.name}.\n 
                             Consequently, you now possess the ability to monitor the devices included in this group.\n\n
                             Thank you`
-                    }, function (error, info) {
-                        if (error) {
-                            console.log('Error:', error);
-                        } else {
-                            console.log('Email sent:');
-                        }
                     });
                 }
             } else {
                 member.group.pull(groupId);
                 group.reference2user.pull(memberId);
-                transporter.sendMail({
+                emailSender.sendMail({
                     from: emailConfig.username,
                     to: member.email,
                     subject: 'Admin have Sucessfully removed a Device Group '+group.name,
@@ -119,12 +106,6 @@ exports.updateGroup = async (req, res) => {
                         Admin have Sucessfully removed User Group ${group.name}.\n 
                         Unfortunately, you no longer possess the capability to monitor the devices associated with this group. I apologize for any inconvenience caused.\n\n
                         Thank you`
-                }, function (error, info) {
-                    if (error) {
-                        console.log('Error:', error);
-                    } else {
-                        console.log('Email sent:');
-                    }
                 });
             }
         }
