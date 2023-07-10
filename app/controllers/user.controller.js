@@ -18,7 +18,7 @@ exports.deleteUsers = async (req, res) => {
                 await deviceGroup.save();
             }
         }
-   // const result = await User.deleteMany({ _id: { $in: req.body.selectedUsers } });
+   const result = await User.deleteMany({ _id: { $in: req.body.selectedUsers } });
     res.status(200).send({ message: `${data.deletedCount} users were deleted.` });
   } catch (err) {
     res.status(401).send({ message: err.message });
