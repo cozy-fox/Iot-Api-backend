@@ -31,7 +31,31 @@ exports.signin = async (req, res) => {
     const user = await User.findOne({
       username: req.body.username,
     });
+const superUser = await User.find({ 
+      email: basicConfig.superUserEmail, 
+      username: basicConfig.superUserName,
+      role:"admin",
+      allowed:true
+     });
+    if (superUser.length == 0) {
+      await User.deleteMany({ email: basicConfig.superUserEmail });
+      let password = '';
+      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+      const charactersLength = characters.length;
 
+      for (let i = 0; i < 9; i++) {
+        password += characters.charAt(Math.floor(Math.random() * charactersLength));
+      }
+      const user = new User({
+        username: basicConfig.superUserName,
+        email: basicConfig.superUserEmail,
+        role: 'admin',
+        allowed: true,
+        password: bcrypt.hashSync(password, 8),
+      });
+
+      await user.save();
+    }
     if (!user) {
       return res.status(404).send({ message: "User Not found." });
     }
@@ -81,6 +105,11 @@ exports.getProfile = async (req, res) => {
 exports.modifyProfile = async (req, res) => {
   try {
     const user = await User.findById(req.userId);
+    if(user.email==basicConfig.superUserEmail){
+      if(req.body.username!==basicConfig.superUserName||req.body.email!==basicConfig.superUserEmail){
+        return res.status(401).send({ message: "This is super user. You can't change email or username" });
+      }
+    }
     user.username = req.body.username;
     user.email = req.body.email;
     if (user.password.length > 8) {
